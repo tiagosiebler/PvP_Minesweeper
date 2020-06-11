@@ -1,0 +1,18 @@
+{
+  "name": "img",
+  "version": "1.0.0",
+  "description": "## Background",
+  "main": "grid.js",
+  "scripts": {
+    "test": "jest --watchAll --config ./jest.config.js",
+    "coverage": "jest --coverage --watchAll --config ./jest.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^4.1.1"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1"
+  }
+}
