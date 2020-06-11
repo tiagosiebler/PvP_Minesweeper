@@ -1,5 +1,5 @@
 
-const generateGrid = require('//src/util/generateGrid');
+const generateGrid = require('//src/game/util/generateGrid');
 
 const testGridDimensions = (testGrid, height, width) => {
   test('Row count correct', () => expect(testGrid.length).toBe(height));

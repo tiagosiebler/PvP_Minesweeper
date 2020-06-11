@@ -1,4 +1,4 @@
-const GridManager = require('./src/GridManager');
+const GridManager = require('./src/game/GridManager');
 
 /*
 Notes:

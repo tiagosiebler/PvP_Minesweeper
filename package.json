@@ -10,9 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "express": "^4.17.1"
   },
   "devDependencies": {
-    "jest": "^26.0.1"
+    "jest": "^26.0.1",
+    "supertest": "^4.0.2"
   }
 }

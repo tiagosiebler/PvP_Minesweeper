@@ -30,9 +30,9 @@ module.exports = (maxHeight, maxWidth) => {
       grid[heightIndex][widthIndex] = {
         hasMine: false,
         counter: -1,
-        state: EnumGridCellState.hidden
-        // h: heightIndex,
-        // w: widthIndex
+        state: EnumGridCellState.hidden,
+        h: heightIndex,
+        w: widthIndex
       };
     }
   }

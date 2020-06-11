@@ -1,6 +1,6 @@
 
-const { getCell, getAdjacentCells } = require('//src/util/gridGetters');
-const generateGrid = require('//src/util/generateGrid');
+const { getCell, getAdjacentCells } = require('//src/game/util/gridGetters');
+const generateGrid = require('//src/game/util/generateGrid');
 
 describe('Getter utility methods for game grid', () => {
   describe('getCellForGrid()', () => {
