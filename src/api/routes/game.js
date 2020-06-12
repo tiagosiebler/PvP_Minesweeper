@@ -1,6 +1,6 @@
 const express = require("express");
 
-const GridManager = require('../../game/GridManager');
+const GameManager = require('../../game/GameManager');
 
 const EnumGridCellState = require('../../game/util/enum/EnumGridCellState');
 const app = express();
@@ -10,9 +10,10 @@ const setupEndpoints = sharedState => {
     return res.json(EnumGridCellState);
   });
 
-  app.put('/cell/:heightIndex/:widthIndex', (req, res) => {
-    const hIndex = req.params.heightIndex;
-    const wIndex = req.params.widthIndex;
+  app.put('/cell', (req, res) => {
+    const hIndex = req.body.heightIndex;
+    const wIndex = req.body.widthIndex;
+    const playerId = req.body.playerId;
 
     if (!sharedState) {
       return res.status(500).json({message: 'state not ready'});
@@ -27,41 +28,30 @@ const setupEndpoints = sharedState => {
     };
 
     if (!gameState.isActive()) {
-      debugger;
+      res.status(400);
+      return res.json({
+        message: 'Game ended due to ' + gameState.stateCode + '. Start new game to continue'
+      });
     }
 
-    // TODO: move state changes into GameManager, this should just pass-through events
-    const cell = gameState.getCell(hIndex, wIndex);
-    const event = {
-      key: 'cellUpdate',
-      cellState: cell
-    };
-
-    if (cell.hasMine) {
-      cell.state = EnumGridCellState.mine;
-
-      const eventReason = 'mine';
-      gameState.end(eventReason);
-
-      event.key = 'gameEnd';
-      event.reason = eventReason;
-
-      sharedState.emitGameEvent(event.key, event);
-      return res.json(event);
+    if (!gameState.isPlayerTurn(playerId)) {
+      res.status(400);
+      const message = `Not your turn - player ${playerId}! Waiting on player ${gameState.getPlayerTurn()}`;
+      return res.json({ message: message });
     }
 
-    cell.state = EnumGridCellState.exposed;
-
-    sharedState.emitGameEvent(event.key, event);
-    res.json(event);
+    const gameEvent = gameState.exposeCell(hIndex, wIndex);
+    sharedState.emitGameEvent(gameEvent.key, gameEvent);
+    return res.json(gameEvent);
   });
 
-  app.get('/testGrid', (req, res) => {
+  // get game state
+  app.get('/', (req, res) => {
     try {
-      const height = 5;
-      const width = 5;
+      const height = 10;
+      const width = 15;
 
-      const mines = 5;
+      const mines = 25;
 
       const gridOptions = {
         height: height,
@@ -69,7 +59,13 @@ const setupEndpoints = sharedState => {
         totalMines: mines
       };
 
-      sharedState.gameState = new GridManager(gridOptions)
+      const existingState = sharedState.gameState;
+      if (existingState && existingState.isActive()) {
+        return res.json(existingState.getGrid());
+      }
+
+      // start new game
+      sharedState.gameState = new GameManager(gridOptions)
         .generate()
         .placeMines()
         .placeMineCounters();

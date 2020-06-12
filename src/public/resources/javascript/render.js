@@ -1,7 +1,7 @@
 var EnumCellState;
 var domGridMatrix;
 var playerState = {
-  playerId: 1
+  playerId: document.location.search.includes('player1') ? 1 : 2
 };
 
 function apiPost(endpoint, body, method = 'POST') {
@@ -11,20 +11,31 @@ function apiPost(endpoint, body, method = 'POST') {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body)
+  })
+  .then(async response => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw await response.json();
   });
 };
 function apiGet(endpoint) {
   return fetch(endpoint).then(response => response.json());
 }
 
-function fetchGrid() {
-  return apiGet('api/v1/game/testGrid');
-}
 function fetchEnumCellState() {
   return apiGet('api/v1/game/enum/cellState');
 }
 function apiExposeCell(hIndex, wIndex) {
-  return apiPost(`api/v1/game/cell/${hIndex}/${wIndex}`, playerState, 'PUT');
+  const requestBody = {
+    heightIndex: hIndex,
+    widthIndex: wIndex,
+    ...playerState
+  };
+  return apiPost(`api/v1/game/cell`, requestBody, 'PUT');
+}
+function apiNewGame() {
+  return apiGet(`api/v1/game`);
 }
 
 function setupWebsocket() {
@@ -39,16 +50,15 @@ function setupWebsocket() {
     if (!data.key) {
       return console.error('Unhandled WS Message Category: ', data, message);
     }
-    const { cellState, reason: eventReason } = data;
+    const { cellState } = data;
     const { h: hIndex, w: wIndex } = cellState || {};
 
     switch(data.key) {
       case 'cellUpdate':
-
         return handleEventCellUpdate(hIndex, wIndex, cellState);
 
       case 'gameEnd':
-        return handleEventGameEnd(hIndex, wIndex, cellState, eventReason);
+        return handleEventGameEnd(hIndex, wIndex, cellState, data);
 
       default:
         console.warn('Unhandled WS Event Type: ', data);
@@ -89,19 +99,29 @@ function createGridInContainer(container, containerWidth, height, width) {
 
 function handleCellClick(hIndex, wIndex) {
   const gameCell = domGridMatrix[hIndex][wIndex];
-  console.log('clickedCell', gameCell, gameCell.rawState);
+  // console.log('clickedCell', gameCell, gameCell.rawState);
 
-  return apiExposeCell(hIndex, wIndex);
+  return apiExposeCell(hIndex, wIndex).catch(e => {
+    if (e && e.message) {
+      return alert('Cannot expose cell - ' + e.message);
+    }
+    console.error('unhandled expose cell api error: ', e);
+  })
 }
 
 function handleEventCellUpdate(hIndex, wIndex, newCellState) {
   const domCell = domGridMatrix[hIndex][wIndex];
+  console.warn('Game cell update ', hIndex, wIndex, newCellState);
   return updateCellState(newCellState, domCell);
 }
 
-function handleEventGameEnd(hIndex, wIndex, newCellState, eventReason) {
+function handleEventGameEnd(hIndex, wIndex, newCellState, event) {
   handleEventCellUpdate(hIndex, wIndex, newCellState);
-  console.warn('Game ended because: ', eventReason);
+  const { reason, eventPlayerId } = event;
+  console.warn('Game ended because: ', reason);
+
+  const prefix = eventPlayerId == playerState.playerId ? 'You lost! ' : 'You won! ';
+  alert(prefix + reason);
 }
 
 function getClassForCellState(cellState) {
@@ -173,7 +193,7 @@ function updateGridState(domGridMatrix, gameStateMatrix) {
   const ws = setupWebsocket();
 
   // TODO: Promise.all()
-  const grid = await fetchGrid();
+  const grid = await apiNewGame();
   EnumCellState = await fetchEnumCellState();
 
   const container = document.getElementById('gameCanvas');

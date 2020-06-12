@@ -1,4 +1,4 @@
-const GridManager = require('./src/game/GridManager');
+const GameManager = require('./src/game/GameManager');
 
 /*
 Notes:
@@ -26,7 +26,7 @@ const setupGame = () => {
       totalMines: mines
     };
 
-    const gameGrid = new GridManager(gridOptions)
+    const gameGrid = new GameManager(gridOptions)
       .generate()
       .placeMines()
       .placeMineCounters();

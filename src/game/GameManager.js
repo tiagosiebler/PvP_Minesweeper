@@ -19,15 +19,28 @@ class GameManager {
 
     this.grid;
 
-    this.gameState = 'active';
+    this.stateCode = 'active';
+    this.playerTurn = 1;
   }
 
   isActive() {
-    return this.gameState == 'active';
+    return this.stateCode == 'active';
+  }
+
+  getPlayerTurn() {
+    return this.playerTurn;
+  }
+
+  isPlayerTurn(playerId) {
+    return this.playerTurn == playerId;
+  }
+
+  togglePlayerTurn() {
+    this.playerTurn = this.playerTurn == 1 ? 2 : 1;
   }
 
   end(reason) {
-
+    this.stateCode = reason;
   }
 
   getState() {
@@ -121,6 +134,37 @@ class GameManager {
       }
     }
     return this;
+  }
+
+  exposeCell(hIndex, wIndex, playerId = this.getPlayerTurn()) {
+    const cell = this.getCell(hIndex, wIndex);
+    if (!cell) {
+      throw new Error(`No cell found at index h${hIndex} w${wIndex}`);
+    }
+
+    const gameEvent = {
+      key: 'cellUpdate',
+      cellState: cell,
+      eventPlayerId: playerId
+    };
+
+    if (cell.state == EnumGridCellState.exposed) {
+      return gameEvent;
+    }
+
+    this.togglePlayerTurn();
+    if (!cell.hasMine) {
+      cell.state = EnumGridCellState.exposed;
+      return gameEvent;
+    }
+
+    cell.state = EnumGridCellState.mine;
+    const eventReason = 'mine';
+    this.end(eventReason);
+
+    gameEvent.key = 'gameEnd';
+    gameEvent.reason = 'Player ' + playerId + ' hit by ' + eventReason;
+    return gameEvent;
   }
 }
 
