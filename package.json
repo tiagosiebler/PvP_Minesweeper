@@ -1,8 +1,8 @@
 {
-  "name": "img",
+  "name": "minesweeperpvp",
   "version": "1.0.0",
-  "description": "## Background",
-  "main": "grid.js",
+  "description": "Minesweeper Exercise",
+  "main": "startServer.js",
   "scripts": {
     "test": "jest --watchAll --config ./jest.config.js",
     "coverage": "jest --coverage --watchAll --config ./jest.config.js"

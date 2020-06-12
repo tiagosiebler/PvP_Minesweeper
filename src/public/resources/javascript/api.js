@@ -41,7 +41,7 @@ function apiExposeCell(hIndex, wIndex) {
 }
 
 function setupWebsocket() {
-  const ws = new WebSocket('ws://localhost:8081');
+  const ws = new WebSocket('ws://'+document.location.hostname+':8081');
   ws.onopen = () => {
     console.log('Now connected to WS');
   };
