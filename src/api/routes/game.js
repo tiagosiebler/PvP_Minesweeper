@@ -1,44 +1,93 @@
 const express = require("express");
 
-const app = express();
-
 const GridManager = require('../../game/GridManager');
 
 const EnumGridCellState = require('../../game/util/enum/EnumGridCellState');
+const app = express();
 
-app.get('/enum/cellState', (req, res) => {
-  return res.json(EnumGridCellState);
-});
+const setupEndpoints = sharedState => {
+  app.get('/enum/cellState', (req, res) => {
+    return res.json(EnumGridCellState);
+  });
 
-app.get("/testGrid", (req, res) => {
-  try {
-    const height = 15;
-    const width = 10;
+  app.put('/cell/:heightIndex/:widthIndex', (req, res) => {
+    const hIndex = req.params.heightIndex;
+    const wIndex = req.params.widthIndex;
 
-    const mines = 10;
+    if (!sharedState) {
+      return res.status(500).json({message: 'state not ready'});
+    }
 
-    const gridOptions = {
-      height: height,
-      width: width,
-      totalMines: mines
+    const gameState = sharedState && sharedState.gameState;
+    if (!gameState) {
+      res.status(404);
+      return res.json({
+        message: 'Game not found'
+      });
     };
 
-    const gameState = new GridManager(gridOptions)
-      .generate()
-      .placeMines()
-      .placeMineCounters();
+    if (!gameState.isActive()) {
+      debugger;
+    }
 
-    return res.json(gameState.getGrid());
-  } catch (e) {
-    const errorDate = new Date();
-    console.error('API exception occurred', e.stack || e);
-    res.status(500);
-    res.json({
-      message: 'API exception occurred',
-      dt: errorDate
-    });
-  }
-});
+    // TODO: move state changes into GameManager, this should just pass-through events
+    const cell = gameState.getCell(hIndex, wIndex);
+    const event = {
+      key: 'cellUpdate',
+      cellState: cell
+    };
 
+    if (cell.hasMine) {
+      cell.state = EnumGridCellState.mine;
 
-module.exports = app;
+      const eventReason = 'mine';
+      gameState.end(eventReason);
+
+      event.key = 'gameEnd';
+      event.reason = eventReason;
+
+      sharedState.emitGameEvent(event.key, event);
+      return res.json(event);
+    }
+
+    cell.state = EnumGridCellState.exposed;
+
+    sharedState.emitGameEvent(event.key, event);
+    res.json(event);
+  });
+
+  app.get('/testGrid', (req, res) => {
+    try {
+      const height = 5;
+      const width = 5;
+
+      const mines = 5;
+
+      const gridOptions = {
+        height: height,
+        width: width,
+        totalMines: mines
+      };
+
+      sharedState.gameState = new GridManager(gridOptions)
+        .generate()
+        .placeMines()
+        .placeMineCounters();
+
+      const gameGrid = sharedState.gameState.getGrid();
+      console.table(gameGrid.map(r => r.map(c => JSON.stringify(c))));
+      return res.json(gameGrid);
+    } catch (e) {
+      const errorDate = new Date();
+      console.error('API exception occurred', e.stack || e);
+      res.status(500);
+      res.json({
+        message: 'API exception occurred',
+        dt: errorDate
+      });
+    }
+  });
+  return app;
+}
+
+module.exports = setupEndpoints;

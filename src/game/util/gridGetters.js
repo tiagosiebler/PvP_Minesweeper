@@ -20,41 +20,37 @@ const getCellForGrid = (heightIndex = 1, widthIndex = 1, grid = []) => {
   return grid[heightIndex][widthIndex];
 }
 
+
 /**
  * @public Get adjacent cells from current position in grid
  * @returns {Array<object>} Array containing cells adjacent to the current position.
+ * [x,x,x],
+ * [x, ,x],
+ * [x,x,x]
  */
 const getAdjacentCells = (heightIndex = 1, widthIndex = 1, grid = []) => {
-    // start top left of current cell
-    const originHeight = heightIndex - 1;
-    const originWidth = widthIndex - 1;
+  // start top left of current cell
+  const originHeight = heightIndex - 1;
+  const originWidth = widthIndex - 1;
 
-    const adjacentCells = [];
+  const adjacentCells = [];
+  const steps = 3;
+  for (let i = 0;i < steps;i++) {
+    for (let y = 0;y < steps;y++) {
+      const hIndex = originHeight + i;
+      const wIndex = originWidth + y;
 
-    //   [x,x,x],
-    //   [ ,c, ],
-    //   [ , , ]
-    adjacentCells.push(getCellForGrid(originHeight, originWidth, grid));
-    adjacentCells.push(getCellForGrid(originHeight, originWidth + 1, grid));
-    adjacentCells.push(getCellForGrid(originHeight, originWidth + 2, grid));
+      // skip the current cell
+      if (hIndex == heightIndex && wIndex == widthIndex) {
+        continue;
+      }
 
-    //   [ , , ],
-    //   [x,c,x],
-    //   [ , , ]
-    adjacentCells.push(getCellForGrid(originHeight + 1, originWidth, grid));
-    adjacentCells.push(getCellForGrid(originHeight + 1, originWidth + 2, grid));
+      adjacentCells.push(getCellForGrid(hIndex, wIndex, grid));
+    }
+  }
 
-    // [
-    //   [ , , ],
-    //   [ ,c, ],
-    //   [x,x,x]
-    // ]
-    adjacentCells.push(getCellForGrid(originHeight + 2, originWidth, grid));
-    adjacentCells.push(getCellForGrid(originHeight + 2, originWidth + 1, grid));
-    adjacentCells.push(getCellForGrid(originHeight + 2, originWidth + 2, grid));
-
-    // invalid coordinates (out of range) will return false. Filter these out:
-    return adjacentCells.filter(cell => cell);
+  // invalid coordinates (out of range) will return false. Filter these out:
+  return adjacentCells.filter(cell => cell);
 }
 
 module.exports = {

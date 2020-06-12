@@ -8,7 +8,7 @@ const EnumGridCellState = require('./util/enum/EnumGridCellState');
 
 const { getCell, getAdjacentCells } = require('./util/gridGetters');
 
-class GridManager {
+class GameManager {
   constructor({ height = 10, width = 10, totalMines = 10 }) {
     this.dimensions = { height, width };
 
@@ -18,6 +18,16 @@ class GridManager {
     };
 
     this.grid;
+
+    this.gameState = 'active';
+  }
+
+  isActive() {
+    return this.gameState == 'active';
+  }
+
+  end(reason) {
+
   }
 
   getState() {
@@ -114,4 +124,4 @@ class GridManager {
   }
 }
 
-module.exports = GridManager;
+module.exports = GameManager;
