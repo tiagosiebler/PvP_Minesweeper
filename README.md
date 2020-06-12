@@ -1,4 +1,4 @@
-# IMG_Minesweeper
+# Minesweeper
 
 ## Setup
 - `npm i`
