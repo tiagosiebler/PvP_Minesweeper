@@ -1,5 +1,7 @@
 # Minesweeper
 
+This is a MVP 2-player minesweeper prototype. The game is orchestrated by a WebSocket enabled API service.
+
 ## Setup
 - `npm i`
 - `npm run start`
