@@ -10,6 +10,27 @@ const setupEndpoints = sharedState => {
     return res.json(EnumGridCellState);
   });
 
+  app.get('/turn', (req, res) => {
+    // TODO: consolidate gameState getter into getter method that throws if game not ready/active
+    const gameState = sharedState && sharedState.gameState;
+    if (!gameState) {
+      res.status(404);
+      return res.json({
+        message: 'Game not found'
+      });
+    };
+    if (!gameState.isActive()) {
+      res.status(400);
+      return res.json({
+        message: 'Game not active. Start new game to continue.'
+      });
+    }
+
+    return res.json({
+      playerId: gameState.getPlayerTurn()
+    });
+  });
+
   app.put('/cell', (req, res) => {
     const hIndex = req.body.heightIndex;
     const wIndex = req.body.widthIndex;

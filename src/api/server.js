@@ -16,16 +16,16 @@ app.listen(8080, () => {
 // Setup WS server
 const socketServer = new WebSocket.Server({port: 8081});
 socketServer.on('connection', socketClient => {
-  console.log('connected');
+  console.log('ws client connected');
   console.log('Number of clients: ', socketServer.clients.size);
 
-
   socketClient.on('close', socketClient => {
-    console.log('closed');
+    console.log('ws client disconnected');
     console.log('Number of clients: ', socketServer.clients.size);
   });
 });
 
+// Setup main game evit emitter
 sharedState.emitGameEvent = (key, parameters) => {
   const event = {
     key: key,

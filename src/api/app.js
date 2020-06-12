@@ -12,12 +12,11 @@ const getExpressApp = sharedState => {
   app.use(express.json());
 
   app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/renderGrid.html'));
+    res.sendFile(path.join(__dirname, '../public/game.html'));
   });
 
   app.use('/api/v1/game', setupGameRouter(sharedState));
 
-  // catch 404
   app.use((req, res, next) => {
     next(createError(404));
   });
@@ -30,10 +29,6 @@ const getExpressApp = sharedState => {
     }
 
     return next();
-    // // render the error page
-    // res.locals.error = req.app.get('env') === 'development' ? err : {};
-    // res.status(err.status || 500);
-    // res.render('error');
   });
 
   return app;

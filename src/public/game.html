@@ -8,7 +8,7 @@
     <!-- Bootstrap CSS -->
     <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"> -->
 
-    <title>Minesweeper Basic Render Test</title>
+    <title>PvP Minesweeper</title>
 
     <style>
       #gameCanvas {
@@ -33,16 +33,16 @@
     </style>
   </head>
   <body>
-    <h1 style="text-align:center">Minesweeper Test 1</h1>
+    <h1 style="text-align:center">PvP Minesweeper</h1>
 
     <div class="container">
-
+      <p id="gameState">Ready</p>
       <div id="gameCanvas"></div>
-      <p id="gameState">Game State: Ready</p>
-
     </div>
 
-    <script src="javascript/render.js"></script>
+    <script src="javascript/api.js"></script>
+    <script src="javascript/state.js"></script>
+    <script src="javascript/renderer.js"></script>
     <script src="https://kit.fontawesome.com/625bb4297d.js" crossorigin="anonymous"></script>
 
     <!-- Optional JavaScript -->

@@ -27,38 +27,6 @@ class GameManager {
     return this.stateCode == 'active';
   }
 
-  getPlayerTurn() {
-    return this.playerTurn;
-  }
-
-  isPlayerTurn(playerId) {
-    return this.playerTurn == playerId;
-  }
-
-  togglePlayerTurn() {
-    this.playerTurn = this.playerTurn == 1 ? 2 : 1;
-  }
-
-  end(reason) {
-    this.stateCode = reason;
-  }
-
-  getState() {
-    return {
-      grid: this.getGrid(),
-      dimensions: this.getDimensions(),
-      mines: this.mines
-    };
-  }
-
-  log(component, ...params) {
-    debug('grid:' + component + '()')(...params);
-  }
-
-  logGrid() {
-    console.table(this.getGrid().map(rows => rows.map(cells => JSON.stringify(cells))));
-  }
-
   getDimensions() {
     return this.dimensions;
   }
@@ -71,6 +39,44 @@ class GameManager {
 
   getCell(heightIndex, widthIndex, grid = this.getGrid()) {
     return getCell(heightIndex, widthIndex, grid);
+  }
+
+  getPlayerTurn() {
+    return this.playerTurn;
+  }
+
+  isPlayerTurn(playerId) {
+    return this.playerTurn == playerId;
+  }
+
+  togglePlayerTurn() {
+    this.playerTurn = this.playerTurn == 1 ? 2 : 1;
+  }
+
+  getState() {
+    return {
+      grid: this.getGrid(),
+      dimensions: this.getDimensions(),
+      mines: this.mines,
+      stateCode: this.stateCode,
+      playerTurn: this.getPlayerTurn()
+    };
+  }
+
+  log(component, ...params) {
+    debug('GameManager' + component + '()')(...params);
+  }
+
+  logGrid() {
+    console.table(this.getGrid().map(rows => rows.map(cells => JSON.stringify(cells))));
+  }
+
+  /**
+   * @public Update state to indicate that game has ended
+   * @param {string} reason why the game ended
+   */
+  end(reason) {
+    this.stateCode = reason;
   }
 
   /**
@@ -136,6 +142,15 @@ class GameManager {
     return this;
   }
 
+
+  /**
+   * @public Expose a cell on behalf of a player. If mine is hit, game is ended.
+   *
+   * @param {number} hIndex height index
+   * @param {number} wIndex width index
+   * @param {*} [playerId=this.getPlayerTurn()]
+   * @returns {object} game state event
+   */
   exposeCell(hIndex, wIndex, playerId = this.getPlayerTurn()) {
     const cell = this.getCell(hIndex, wIndex);
     if (!cell) {
@@ -154,6 +169,7 @@ class GameManager {
 
     this.togglePlayerTurn();
     if (!cell.hasMine) {
+      gameEvent.nextPlayerId = this.getPlayerTurn();
       cell.state = EnumGridCellState.exposed;
       return gameEvent;
     }
